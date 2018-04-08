@@ -17,7 +17,7 @@ int drawPlatform(){					//Draw the ground
 
 int drawAxisHelper(){					//Draw x and y axis
 	glPushMatrix();
-		glTranslatef(-xPos+0.1, -yPos, 0.0);
+		glTranslatef(-xPos, -yPos, 0.0);
 		glBegin(GL_LINES);
 			glColor3f(1.0, 0.0, 0.0);
 			glVertex3f(0.0, 0.0, 0.0);
@@ -36,7 +36,7 @@ int drawAxisHelper(){					//Draw x and y axis
 
 int drawChar(){						//Draw a character
 	glPushMatrix();
-		glRotatef(45.0*(charDirection), 0.0, 0.0, 1.0);
+		glRotatef(45.0*(charDirection+turnRatio), 0.0, 0.0, 1.0);
 		glBegin(GL_LINES);
 			glColor3f(1.0, 0.0, 0.0);
 			glVertex2f(0.0, 0.0);

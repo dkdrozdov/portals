@@ -11,6 +11,7 @@ double xCharRelative=0.0, yCharRelative=0.0;
 int charDirection=0;
 
 //Keyboard
+int turnRatio=1;
 unsigned char pressedKey;
 bool keyPressed[4]={0, 0, 0, 0};
 

@@ -13,6 +13,8 @@ void display(void){
 	glClear(GL_COLOR_BUFFER_BIT);
 	glPushMatrix();
 		glTranslatef(0.0, 0.0, -20.0);
+		glRotatef(-45.0, 1.0, 0.0, 0.0);
+		glRotatef(-45.0*turnRatio, 0.0, 0.0, 1.0);
 		drawPlatform();
 		drawWalls();
 		drawChar();
@@ -43,5 +45,6 @@ void keyboard(unsigned char key, int x, int y){
 
 void keyboard_up(unsigned char key, int x, int y){
 	determineKeyState(key, 0);
+	keystroke(key);
 }
 

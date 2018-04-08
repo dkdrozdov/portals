@@ -25,3 +25,14 @@ int determineKeyState(unsigned char usedKey, bool newState){ //Sets the state fo
 	return 0;
 }
 
+int keystroke(unsigned char usedKey){
+	switch(usedKey){
+		case 'r':{
+			turnRatio=(turnRatio+1)%8;
+			glutPostRedisplay();
+			break;}
+		default:{
+			break;}
+	}
+	return 0;
+}

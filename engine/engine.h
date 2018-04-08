@@ -44,6 +44,7 @@ extern WALL_OBSTACLE object_walls[OBJECT_WALLS_MAX];
 extern PLATFORM_SQUARE object_platforms[OBJECT_PLATFORMS_MAX];
 extern int wallCount, platformCount;
 extern bool keyPressed[4];
+extern int turnRatio;
 extern GLdouble xPos, yPos;
 extern int charDirection;
 
@@ -66,6 +67,7 @@ int initWalls();
 
 //Keyboard.cpp:
 int determineKeyState(unsigned char usedKey, bool newState);
+int keystroke(unsigned char usedKey);
 
 //Character.cpp:
 void charMove(void);

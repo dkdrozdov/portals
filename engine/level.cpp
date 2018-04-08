@@ -8,7 +8,7 @@ int initPlatforms(){
 	object_platforms[0].y[1]=PLATFORM_LENGTH;
 	
 	object_platforms[1].x[0]=0.0;
-	object_platforms[1].y[0]=0.0;
+	object_platforms[1].y[0]=PLATFORM_LENGTH-OBJECT_WALL_GEN_WIDTH;
 	object_platforms[1].x[1]=PLATFORM_WIDTH;
 	object_platforms[1].y[1]=PLATFORM_LENGTH*2;
 

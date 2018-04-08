@@ -1,8 +1,8 @@
 #include "engine.h"
 
 
-int changePosition(){			
-	switch(charDirection){
+int changePosition(){		
+	switch((charDirection+turnRatio)%8){
 		case DIRECTION_UP_RIGHT:{
 			if(checkObstacles(xPos+(CHAR_SPEED*DIAGONAL_MOTION_FACTOR), 
 					  yPos+(CHAR_SPEED*DIAGONAL_MOTION_FACTOR))){
