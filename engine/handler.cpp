@@ -1,4 +1,4 @@
-#include "engine.h"
+#include "input.h"
 
 
 int determineKeyState(unsigned char usedKey, bool newState){ //Sets the state for used key
@@ -29,8 +29,10 @@ int keystroke(unsigned char usedKey){
 	switch(usedKey){
 		case 'r':{
 			turnRatio=(turnRatio+1)%8;
-			glutPostRedisplay();
 			break;}
+		case 'f':{
+			camera_fixed=!camera_fixed;
+			 }
 		default:{
 			break;}
 	}

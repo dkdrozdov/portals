@@ -1,6 +1,9 @@
-#include <windows.h>
-#include <stdio.h>
+#pragma once
 #include <GL/glut.h>
+#include <stdio.h>
+
+//Render
+#define FRAME_TIME 10
 
 //Level
 #define PLATFORM_WIDTH 10.0	
@@ -11,8 +14,8 @@
 #define WALL_HEIGHT 5.0
 
 //Character
-#define CHAR_SPEED 0.10		
-#define CHAR_HITBOX 1.0
+#define PLAYER_SPEED 0.1
+#define PLAYER_HITBOX 1.0
 #define DIAGONAL_MOTION_FACTOR 0.75
 #define DIRECTION_UP 0
 #define DIRECTION_UP_LEFT 1
@@ -39,39 +42,19 @@ typedef struct platform_square{
 	double y[2];
 }PLATFORM_SQUARE;
 
-//Engine.cpp:
+typedef struct character{
+	double x;
+	double y;
+	double speed;
+	double hitbox;
+	int direction;
+}CHARACTER;
+
+//Global data:
 extern WALL_OBSTACLE object_walls[OBJECT_WALLS_MAX];
 extern PLATFORM_SQUARE object_platforms[OBJECT_PLATFORMS_MAX];
+extern CHARACTER character_player;
 extern int wallCount, platformCount;
 extern bool keyPressed[4];
 extern int turnRatio;
-extern GLdouble xPos, yPos;
-extern int charDirection;
-
-//Drawing.cpp:
-int drawPlatform();
-int drawWalls();
-int drawChar();
-int drawAxisHelper();
-
-//Callback.cpp:
-void display(void);
-void reshape(int w, int h);
-void keyboard(unsigned char key, int x, int y);
-void keyboard_up(unsigned char key, int x, int y);
-void init(void);
-
-//Level.cpp:
-int initPlatforms();
-int initWalls();
-
-//Keyboard.cpp:
-int determineKeyState(unsigned char usedKey, bool newState);
-int keystroke(unsigned char usedKey);
-
-//Character.cpp:
-void charMove(void);
-
-//Collision.cpp:
-bool checkObstacles(double newPosX, double newPosY);
-
+extern bool camera_fixed;
