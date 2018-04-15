@@ -1,8 +1,7 @@
 #include "store.h"
 
 //Level.cpp:
-int initPlatforms();
-int initWalls();
+int loadLevel();
 
 //Keyboard.cpp:
 int determineKeyState(unsigned char usedKey, bool newState);

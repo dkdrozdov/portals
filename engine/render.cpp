@@ -3,37 +3,38 @@
 #include "input.h"
 
 //Level
-WALL_OBSTACLE object_walls[OBJECT_WALLS_MAX];
-PLATFORM_SQUARE object_platforms[OBJECT_PLATFORMS_MAX];
-int wallCount=0, platformCount=0;
+OBSTACLE_WALL level_walls[WALL_MAX];
+PLATFORM level_platforms[PLATFORM_MAX];
+UNIT unit_npc[UNIT_MAX];
+int n_wall=0, n_platform=0, n_npc=1;
 
 //Character
-CHARACTER character_player={5.0, 5.0, PLAYER_SPEED, PLAYER_HITBOX, 0};
+UNIT unit_player={5.0, 5.0, PLAYER_SPEED, PLAYER_HITBOX, 0};
 
 //Keyboard
-int turnRatio=1;
+int turn_ratio=7;
 unsigned char pressedKey;
-bool keyPressed[4]={0, 0, 0, 0};
+bool key_motion[4]={0, 0, 0, 0};
 
 //Render
-double camera_x=character_player.x, camera_y=character_player.y;
+double camera_x=unit_player.x, camera_y=unit_player.y;
 bool camera_fixed=false;
 
-int drawPlatform(){
+int draw_platforms(){
 	int count;
-	for(count=0; count<platformCount; count++){
+	for(count=0; count<n_platform; count++){
 		glPushMatrix();
 			glTranslatef(-camera_x, -camera_y, -0.1);
 			glColor3f(0.6, 0.6, 0.6);
-			glRectf(object_platforms[count].x[0], object_platforms[count].y[0],
-				object_platforms[count].x[1], object_platforms[count].y[1]);
+			glRectf(level_platforms[count].x[0], level_platforms[count].y[0],
+				level_platforms[count].x[1], level_platforms[count].y[1]);
 		glPopMatrix();
 	}
 
 	return 0;
 }
 
-int drawAxisHelper(){
+int draw_axis(){
 	glPushMatrix();
 		glTranslatef(-camera_x, -camera_y, 0.0);
 		glBegin(GL_LINES);
@@ -52,51 +53,51 @@ int drawAxisHelper(){
 	return 0;
 }
 
-int drawCharacter(){
+int draw_unit(UNIT unit){
 	glPushMatrix();
-		glTranslatef(-camera_x+character_player.x, 
-			     -camera_y+character_player.y, 0.0);
-		glRotatef(45.0*(character_player.direction+turnRatio), 0.0, 0.0, 1.0);
+		glTranslatef(-camera_x+unit.x, 
+			     -camera_y+unit.y, 0.0);
+		glRotatef(45.0*unit.direction, 0.0, 0.0, 1.0);
 		glBegin(GL_LINES);
 			glColor3f(1.0, 0.0, 0.0);
 			glVertex2f(0.0, 0.0);
-			glVertex2f(0.0, character_player.hitbox);
+			glVertex2f(0.0, unit.hitbox);
 		glEnd();
 	glPopMatrix();
 
 	glPushMatrix();
-		glTranslatef(-camera_x+character_player.x,
-			     -camera_y+character_player.y, 0.0);
+		glTranslatef(-camera_x+unit.x,
+			     -camera_y+unit.y, 0.0);
 		glBegin(GL_LINES);
 			glColor3f(0.2, 0.2, 1.0);
-			glVertex2f(-character_player.hitbox, character_player.hitbox);
-			glVertex2f(character_player.hitbox, character_player.hitbox);
+			glVertex2f(-unit.hitbox, unit.hitbox);
+			glVertex2f(unit.hitbox, unit.hitbox);
 
-			glVertex2f(-character_player.hitbox, -character_player.hitbox);
-			glVertex2f(-character_player.hitbox, character_player.hitbox);
+			glVertex2f(-unit.hitbox, -unit.hitbox);
+			glVertex2f(-unit.hitbox, unit.hitbox);
 
-			glVertex2f(-character_player.hitbox, -character_player.hitbox);
-			glVertex2f(character_player.hitbox, -character_player.hitbox);
+			glVertex2f(-unit.hitbox, -unit.hitbox);
+			glVertex2f(unit.hitbox, -unit.hitbox);
 			
-			glVertex2f(character_player.hitbox, -character_player.hitbox);
-			glVertex2f(character_player.hitbox, character_player.hitbox);
+			glVertex2f(unit.hitbox, -unit.hitbox);
+			glVertex2f(unit.hitbox, unit.hitbox);
 		glEnd();
 	glPopMatrix();
 
 	return 0;
 }
 
-int drawWalls(){					//ÏÅÍÒÓÐÀ//
+int draw_walls(){					//ÏÅÍÒÓÐÀ//
 	int count;
-	for(count=0; count<wallCount; count++){
+	for(count=0; count<n_wall; count++){
 		glPushMatrix();
 			glTranslatef(-camera_x, -camera_y, 0.1);
 			glColor3f(0.3, 0.3, 0.3);
 			glBegin(GL_POLYGON);
-				glVertex2f(object_walls[count].x[0],object_walls[count].y[0]);
-				glVertex2f(object_walls[count].x[0],object_walls[count].y[1]);
-				glVertex2f(object_walls[count].x[1],object_walls[count].y[1]);
-				glVertex2f(object_walls[count].x[1],object_walls[count].y[0]);
+				glVertex2f(level_walls[count].x[0],level_walls[count].y[0]);
+				glVertex2f(level_walls[count].x[0],level_walls[count].y[1]);
+				glVertex2f(level_walls[count].x[1],level_walls[count].y[1]);
+				glVertex2f(level_walls[count].x[1],level_walls[count].y[0]);
 			glEnd();
 		glPopMatrix();}
 
@@ -111,21 +112,27 @@ void init(void){
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_POLYGON_SMOOTH);
 	
-	initPlatforms();
-	initWalls();
+	loadLevel();
 }
 
+int draw_npcs(){
+	int i;
+	for(i=0; i<n_npc; i++){
+		draw_unit(unit_npc[i]);}
+	return 0;
+}
 
 void display(void){
 	glClear(GL_COLOR_BUFFER_BIT);
 	glPushMatrix();
 		glTranslatef(0.0, 0.0, -20.0);
 		glRotatef(-45.0, 1.0, 0.0, 0.0);
-		glRotatef(-45.0*turnRatio, 0.0, 0.0, 1.0);
-		drawPlatform();
-		drawWalls();
-		drawCharacter();
-		drawAxisHelper();
+		glRotatef(-45.0*turn_ratio, 0.0, 0.0, 1.0);
+		draw_platforms();
+		draw_walls();
+		draw_unit(unit_player);
+		draw_npcs();
+		draw_axis();
 	glPopMatrix();
 
 
@@ -137,8 +144,8 @@ void reshape(int w, int h){
 	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(-14.0, 14.0, 
-		-10.0, 10.0,
+	glOrtho(-23.0, 23.0, 
+		-15.0, 15.0,
 		1.0, 50.0);
 
 	glMatrixMode(GL_MODELVIEW);
@@ -157,13 +164,19 @@ void keyboard_up(unsigned char key, int x, int y){
 void idle_frames(void){
 	Sleep(FRAME_TIME);
 
-	if(movingCondition()){
-		determinePlayerDirection();
-		charMove(&character_player);}
+	int i;
+	state_process();
+
+	if(unit_player.state[0].value<=0){
+		printf("You are dead!\n");
+		exit(0);
+	}
+
+	char_move(&unit_player);
 
 	if(!camera_fixed){
-		camera_x=character_player.x;
-		camera_y=character_player.y;}
+		camera_x=unit_player.x;
+		camera_y=unit_player.y;}
 	
 	glutPostRedisplay();
 }
@@ -172,7 +185,7 @@ void idle_frames(void){
 int main(int argc, char **argv){
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB);
-	glutInitWindowSize(700, 500);
+	glutInitWindowSize(690, 450);
 	glutInitWindowPosition(100, 100);
 	glutCreateWindow("Engine");
 	init();

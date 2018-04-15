@@ -1,20 +1,23 @@
+/*				Ï.Å.Í.Ò.Ó.Ð.À					*/
 #pragma once
 #include <GL/glut.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 //Render
-#define FRAME_TIME 10
+#define FRAME_TIME 30
 
 //Level
 #define PLATFORM_WIDTH 10.0	
 #define PLATFORM_LENGTH 10.0
-#define OBJECT_WALLS_MAX 100
-#define OBJECT_PLATFORMS_MAX 100
-#define OBJECT_WALL_GEN_WIDTH 1.0
+#define UNIT_MAX 10
+#define WALL_MAX 10
+#define PLATFORM_MAX 10
+#define WALL_GEN_WIDTH 1.0
 #define WALL_HEIGHT 5.0
 
 //Character
-#define PLAYER_SPEED 0.1
+#define PLAYER_SPEED 0.005
 #define PLAYER_HITBOX 1.0
 #define DIAGONAL_MOTION_FACTOR 0.75
 #define DIRECTION_UP 0
@@ -26,35 +29,52 @@
 #define DIRECTION_RIGHT 6
 #define DIRECTION_UP_RIGHT 7
 
+//Effects
+#define LIFE 0
+
 //Keyboard
 #define KEY_W 0
 #define KEY_A 1
 #define KEY_S 2
 #define KEY_D 3
 
-typedef struct wall_obstacle{
+typedef struct obstacle_wall_struct{
 	double x[2];
 	double y[2];
-}WALL_OBSTACLE;
+}OBSTACLE_WALL;
 
-typedef struct platform_square{
+typedef struct platform_struct{
 	double x[2];
 	double y[2];
-}PLATFORM_SQUARE;
+}PLATFORM;
 
-typedef struct character{
+typedef struct effect_struct{
+	int time;
+	int value;
+	int type;
+}EFFECT;
+
+typedef struct unit_struct{
 	double x;
 	double y;
 	double speed;
 	double hitbox;
 	int direction;
-}CHARACTER;
+	EFFECT state[10];
+	int n_state;
+}UNIT;
+
+typedef struct object_struct{
+	double x;
+	double y;
+}OBJECT_INTERACTIVE;
 
 //Global data:
-extern WALL_OBSTACLE object_walls[OBJECT_WALLS_MAX];
-extern PLATFORM_SQUARE object_platforms[OBJECT_PLATFORMS_MAX];
-extern CHARACTER character_player;
-extern int wallCount, platformCount;
-extern bool keyPressed[4];
-extern int turnRatio;
+extern OBSTACLE_WALL level_walls[WALL_MAX];
+extern PLATFORM level_platforms[PLATFORM_MAX];
+extern UNIT unit_player;
+extern UNIT unit_npc[UNIT_MAX];
+extern int n_wall, n_platform, n_npc;
+extern bool key_motion[4];
+extern int turn_ratio;
 extern bool camera_fixed;

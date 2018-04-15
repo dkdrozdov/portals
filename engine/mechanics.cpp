@@ -8,7 +8,7 @@ typedef struct segment{
 	double y2;
 }SEGMENT;
 
-bool checkCrossing(SEGMENT s1, SEGMENT s2, double *crosspoint){
+bool check_collision(SEGMENT s1, SEGMENT s2, double *crosspoint){
 	float s1_x, s1_y, s2_x, s2_y;
 	s1_x=s1.x2-s1.x1;
 	s1_y=s1.y2-s1.y1;
@@ -30,7 +30,7 @@ bool checkCrossing(SEGMENT s1, SEGMENT s2, double *crosspoint){
 	return false; //No collision
 }
 
-bool checkObstacles(double newPosX, double newPosY, double hitbox){
+bool check_obstacles(double newPosX, double newPosY, double hitbox){
 	int count=0, i;
 	double intersection[2]={0.0, 0.0};
 
@@ -56,41 +56,41 @@ bool checkObstacles(double newPosX, double newPosY, double hitbox){
 	hitboxFront.x2=newPosX+hitbox;
 	hitboxFront.y2=newPosY+hitbox;
 
-	while(count<wallCount){
-		wallSegment[0].x1=object_walls[count].x[0];
-		wallSegment[0].y1=object_walls[count].y[0];
-		wallSegment[0].x2=object_walls[count].x[0];
-		wallSegment[0].y2=object_walls[count].y[1];
+	while(count<n_wall){
+		wallSegment[0].x1=level_walls[count].x[0];
+		wallSegment[0].y1=level_walls[count].y[0];
+		wallSegment[0].x2=level_walls[count].x[0];
+		wallSegment[0].y2=level_walls[count].y[1];
 
-		wallSegment[1].x1=object_walls[count].x[0];
-		wallSegment[1].y1=object_walls[count].y[1];
-		wallSegment[1].x2=object_walls[count].x[1];
-		wallSegment[1].y2=object_walls[count].y[1];
+		wallSegment[1].x1=level_walls[count].x[0];
+		wallSegment[1].y1=level_walls[count].y[1];
+		wallSegment[1].x2=level_walls[count].x[1];
+		wallSegment[1].y2=level_walls[count].y[1];
 
-		wallSegment[2].x1=object_walls[count].x[1];
-		wallSegment[2].y1=object_walls[count].y[1];
-		wallSegment[2].x2=object_walls[count].x[1];
-		wallSegment[2].y2=object_walls[count].y[0];
+		wallSegment[2].x1=level_walls[count].x[1];
+		wallSegment[2].y1=level_walls[count].y[1];
+		wallSegment[2].x2=level_walls[count].x[1];
+		wallSegment[2].y2=level_walls[count].y[0];
 
-		wallSegment[3].x1=object_walls[count].x[1];
-		wallSegment[3].y1=object_walls[count].y[0];
-		wallSegment[3].x2=object_walls[count].x[0];
-		wallSegment[3].y2=object_walls[count].y[0];
+		wallSegment[3].x1=level_walls[count].x[1];
+		wallSegment[3].y1=level_walls[count].y[0];
+		wallSegment[3].x2=level_walls[count].x[0];
+		wallSegment[3].y2=level_walls[count].y[0];
 
 		for(i=0; i<4; i++){			//for each side of wall
-			if(checkCrossing(hitboxFront, wallSegment[i], intersection)){
+			if(check_collision(hitboxFront, wallSegment[i], intersection)){
 				return false;
 			}
 	
-			if(checkCrossing(hitboxBack, wallSegment[i], intersection)){
+			if(check_collision(hitboxBack, wallSegment[i], intersection)){
 				return false;
 			}
 	
-			if(checkCrossing(hitboxRight, wallSegment[i], intersection)){
+			if(check_collision(hitboxRight, wallSegment[i], intersection)){
 				return false;
 			}
 	
-			if(checkCrossing(hitboxLeft, wallSegment[i], intersection)){
+			if(check_collision(hitboxLeft, wallSegment[i], intersection)){
 				return false;
 			}
 		}
@@ -101,45 +101,45 @@ bool checkObstacles(double newPosX, double newPosY, double hitbox){
 	return true;
 }
 
-int changePosition(int direction, double speed,
+int change_position(int direction, double speed,
 		   double *xPos, double *yPos, double hitbox){
-	switch((direction+turnRatio)%8){
+	switch(direction){
 		case DIRECTION_UP_RIGHT:{
-			if(checkObstacles(*xPos+(speed*DIAGONAL_MOTION_FACTOR), 
+			if(check_obstacles(*xPos+(speed*DIAGONAL_MOTION_FACTOR), 
 					 *yPos+(speed*DIAGONAL_MOTION_FACTOR),hitbox)){
 			*xPos=*xPos+(speed*DIAGONAL_MOTION_FACTOR);
 			*yPos=*yPos+(speed*DIAGONAL_MOTION_FACTOR);}
 			break;}
 
 		case DIRECTION_UP:{
-			if(checkObstacles(*xPos, *yPos+speed, hitbox)){
+			if(check_obstacles(*xPos, *yPos+speed, hitbox)){
 			*yPos=*yPos+speed;}
 			break;}
 
 		case DIRECTION_RIGHT:{
-			if(checkObstacles(*xPos+speed, *yPos, hitbox)){
+			if(check_obstacles(*xPos+speed, *yPos, hitbox)){
 			*xPos=*xPos+speed;}
 			break;}
 
 		case DIRECTION_DOWN_LEFT:{
-			if(checkObstacles(*xPos-(speed*DIAGONAL_MOTION_FACTOR), 
+			if(check_obstacles(*xPos-(speed*DIAGONAL_MOTION_FACTOR), 
 					 *yPos-(speed*DIAGONAL_MOTION_FACTOR),hitbox)){
 			*xPos=*xPos-(speed*DIAGONAL_MOTION_FACTOR);
 			*yPos=*yPos-(speed*DIAGONAL_MOTION_FACTOR);}
 			break;}
 
 		case DIRECTION_LEFT:{
-			if(checkObstacles(*xPos-speed, *yPos, hitbox)){
+			if(check_obstacles(*xPos-speed, *yPos, hitbox)){
 			*xPos=*xPos-speed;}
 			break;}
 
 		case DIRECTION_DOWN:{
-			if(checkObstacles(*xPos, *yPos-speed, hitbox)){
+			if(check_obstacles(*xPos, *yPos-speed, hitbox)){
 			*yPos=*yPos-speed;}
 			break;}
 
 		case DIRECTION_UP_LEFT:{
-			if(checkObstacles(*xPos-(speed*DIAGONAL_MOTION_FACTOR), 
+			if(check_obstacles(*xPos-(speed*DIAGONAL_MOTION_FACTOR), 
 					 *yPos+(speed*DIAGONAL_MOTION_FACTOR),hitbox)){
 			*xPos=*xPos-(speed*DIAGONAL_MOTION_FACTOR);
 			*yPos=*yPos+(speed*DIAGONAL_MOTION_FACTOR);}
@@ -147,7 +147,7 @@ int changePosition(int direction, double speed,
 			break;}
 
 		case DIRECTION_DOWN_RIGHT:{
-			if(checkObstacles(*xPos+(speed*DIAGONAL_MOTION_FACTOR), 
+			if(check_obstacles(*xPos+(speed*DIAGONAL_MOTION_FACTOR), 
 					 *yPos-(speed*DIAGONAL_MOTION_FACTOR),hitbox)){
 			*xPos=*xPos+(speed*DIAGONAL_MOTION_FACTOR);
 			*yPos=*yPos-(speed*DIAGONAL_MOTION_FACTOR);}
@@ -157,49 +157,91 @@ int changePosition(int direction, double speed,
 	}
 }
 
-int determinePlayerDirection(){				//Set the direction of char,
-	if(keyPressed[KEY_A]){				//considering pressed keys
-		character_player.direction=DIRECTION_LEFT;}
+int determine_player_direction(){			//Set the direction of char,
+	if(key_motion[KEY_A]){				//considering pressed keys
+		unit_player.direction=DIRECTION_LEFT;}
 
-	if(keyPressed[KEY_D]){
-		character_player.direction=DIRECTION_RIGHT;}
+	if(key_motion[KEY_D]){
+		unit_player.direction=DIRECTION_RIGHT;}
 
-	if(keyPressed[KEY_S]){
-		character_player.direction=DIRECTION_DOWN;
-		if(keyPressed[KEY_A]){
-			character_player.direction=DIRECTION_DOWN_LEFT;}
-		if(keyPressed[KEY_D]){
-			character_player.direction=DIRECTION_DOWN_RIGHT;}
+	if(key_motion[KEY_S]){
+		unit_player.direction=DIRECTION_DOWN;
+		if(key_motion[KEY_A]){
+			unit_player.direction=DIRECTION_DOWN_LEFT;}
+		if(key_motion[KEY_D]){
+			unit_player.direction=DIRECTION_DOWN_RIGHT;}
 	}
 
-	if(keyPressed[KEY_W]){
-		character_player.direction=DIRECTION_UP;
-		if(keyPressed[KEY_A]){
-			character_player.direction=DIRECTION_UP_LEFT;}
-		if(keyPressed[KEY_D]){
-			character_player.direction=DIRECTION_UP_RIGHT;}}
+	if(key_motion[KEY_W]){
+		unit_player.direction=DIRECTION_UP;
+		if(key_motion[KEY_A]){
+			unit_player.direction=DIRECTION_UP_LEFT;}
+		if(key_motion[KEY_D]){
+			unit_player.direction=DIRECTION_UP_RIGHT;}}
+
+							//offset of camera rotation
+	unit_player.direction=(unit_player.direction+turn_ratio)%8;
 	return 0;
 }
 
-bool movingCondition(){					//Check for moving possibility
-	if(!(keyPressed[KEY_W]|keyPressed[KEY_A]|keyPressed[KEY_S]|keyPressed[KEY_D])){
+bool determine_player_motion(){				//Check for moving possibility
+	if(!(key_motion[KEY_W]|key_motion[KEY_A]|key_motion[KEY_S]|key_motion[KEY_D])){
 		return false;}
 
-	if((keyPressed[KEY_W]&&keyPressed[KEY_S])|
-	(keyPressed[KEY_A]&&keyPressed[KEY_D])){
+	if((key_motion[KEY_W]&&key_motion[KEY_S])|
+	(key_motion[KEY_A]&&key_motion[KEY_D])){
 		return false;}
 
 	return true;
 }
 
-int charMove(CHARACTER *character){			//Movement animation
+int char_move(UNIT *unit){			//Movement animation
 	int i;
-//	printf("enter %f, %f\n", character->x, character->y);
-	for(i=0; i<(FRAME_TIME/10); i++){
-		changePosition(character->direction, character->speed, 
-			       &character->x, &character->y, 
-			       character->hitbox);}
-//	printf("exit  %f, %f\n\n", character->x, character->y);
+	if(determine_player_motion()){
+		determine_player_direction();
+
+		for(i=0; i<(FRAME_TIME); i++){
+			change_position(unit->direction, unit->speed, 
+				       &unit->x, &unit->y, 
+				       unit->hitbox);
+		}
+	}
+
+	return 0;
+}
+
+int bury_npc(int index){
+	printf("number %d is dead!\n", index+1);
+	if(index+1==n_npc){
+		n_npc--;
+	}
+	else{
+		int i;
+		for(i=index+1; i<n_npc; i++){
+			unit_npc[i-1]=unit_npc[i];
+		}
+		n_npc--;
+	}
+}
+
+int check_graveyard(){
+	int i=0;
+
+	while(i<n_npc){
+		if(unit_npc[i].state[0].value<=0){
+			bury_npc(i);
+		}
+		else{
+			i++;
+		}
+	}
+}
+
+
+int state_process(){			//Processing of units state
+	int i;
+
+	check_graveyard();
 
 	return 0;
 }

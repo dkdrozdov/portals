@@ -1,7 +1,8 @@
 #include "store.h"
 
 //
-bool movingCondition();
-int determinePlayerDirection();
-int charMove(CHARACTER *character);
-bool checkObstacles(double newPosX, double newPosY);
+bool moving_condition();
+int determine_player_direction();
+int char_move(UNIT *unit);
+bool check_obstacles(double newPosX, double newPosY);
+int state_process();
