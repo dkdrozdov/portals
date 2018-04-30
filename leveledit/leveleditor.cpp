@@ -77,7 +77,7 @@ void init(void){					//Initialization
 	glShadeModel(GL_SMOOTH);
 
 
-	if(FILE *levelf=fopen("testlevel.txt", "r")!=NULL){
+/*	if(FILE *levelf=fopen("testlevel.txt", "r")!=NULL){
 		int i=0;
 		char object_name;
 		char object_value_type;
@@ -92,7 +92,7 @@ void init(void){					//Initialization
 		fclose(levelf);
 	}
 	else{
-		printf("File you have can not be opened.");}
+		printf("File you have can not be opened.");}*/
 
 	object_platforms[0].x[0]=0.0;
 	object_platforms[0].y[0]=0.0;

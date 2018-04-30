@@ -43,26 +43,28 @@ int initWalls(){
 int loadLevel(){
 	initPlatforms();
 	initWalls();
+	unit_player.max_hp=10;
 	unit_player.state[0].time=0;
-	unit_player.state[0].value=1;
+	unit_player.state[0].value=10;
 	unit_player.state[0].type=LIFE;
 	unit_player.n_state=1;
 
-	unit_npc[0].x=level_platforms[0].x[0]+5.0;
-	unit_npc[0].y=level_platforms[0].y[1]-5.0;
+	unit_npc[0].x=level_platforms[0].x[1]/1.5;
+	unit_npc[0].y=level_platforms[0].y[1]/2+WALL_GEN_WIDTH/2;
 	unit_npc[0].speed=PLAYER_SPEED;
 	unit_npc[0].hitbox=PLAYER_HITBOX;
 	unit_npc[0].direction=0;
 	unit_npc[0].state[0].time=0;
-	unit_npc[0].state[0].value=1;
+	unit_npc[0].state[0].value=5;
 	unit_npc[0].state[0].type=LIFE;
+	unit_npc[0].max_hp=10;
 	unit_npc[0].n_state=1;
 
-	level_walls[n_wall].x[0]=level_platforms[0].x[0];
-	level_walls[n_wall].y[0]=level_platforms[0].y[1]/2-WALL_GEN_WIDTH/2;
-	level_walls[n_wall].x[1]=level_platforms[0].x[1]/1.5;
-	level_walls[n_wall].y[1]=level_platforms[0].y[1]/2+WALL_GEN_WIDTH/2;
-	n_wall++;
+//	level_walls[n_wall].x[0]=level_platforms[0].x[0];
+//	level_walls[n_wall].y[0]=level_platforms[0].y[1]/2-WALL_GEN_WIDTH/2;
+//	level_walls[n_wall].x[1]=level_platforms[0].x[1]/1.5;
+//	level_walls[n_wall].y[1]=level_platforms[0].y[1]/2+WALL_GEN_WIDTH/2;
+//	n_wall++;
 
 	level_walls[n_wall].x[0]=level_platforms[0].x[1]/3-WALL_GEN_WIDTH/2;
 	level_walls[n_wall].y[0]=level_platforms[0].y[1]/1.5;

@@ -1,4 +1,5 @@
 #include "input.h"
+#include "magic.h"
 
 
 int determineKeyState(unsigned char usedKey, bool newState){ //Sets the state for used key
@@ -59,13 +60,70 @@ int keystroke(unsigned char usedKey){
 			 break;}
 		case 'n':{
 			 if(n_npc<=UNIT_MAX-1){
-				 unit_npc[n_npc].state[0].value=1;
-				 unit_npc[n_npc].x=unit_player.x;
-				 unit_npc[n_npc].y=unit_player.y;
-				 unit_npc[n_npc].hitbox=PLAYER_HITBOX;
-				 n_npc++;
-				 printf("n_npc=%d\n", n_npc);}
+				unit_npc[n_npc].speed=PLAYER_SPEED;
+				unit_npc[n_npc].hitbox=PLAYER_HITBOX;
+				unit_npc[n_npc].direction=0;
+				unit_npc[n_npc].x=unit_player.x+unit_player.hitbox
+				 		+unit_npc[n_npc].hitbox;
+				unit_npc[n_npc].y=unit_player.y;
+				unit_npc[n_npc].max_hp=10;
+				unit_npc[n_npc].state[0].time=0;
+				unit_npc[n_npc].state[0].value=10;
+				unit_npc[n_npc].state[0].type=LIFE;
+				unit_npc[n_npc].n_state=1;
+				n_npc++;
+				printf("n_npc=%d\n", n_npc);}
 			 break;}
+		case KEY_RUNE_KAN:{
+			magic_get_base(RUNE_KAN);
+		     	break;}
+		case KEY_RUNE_RU:{
+			magic_get_base(RUNE_RU);
+		     	break;}
+		case KEY_RUNE_TER:{
+			magic_get_base(RUNE_TER);
+		     	break;}
+		case KEY_RUNE_RAN:{
+			magic_get_base(RUNE_RAN);
+		     	break;}
+		case KEY_RUNE_DUR:{
+			magic_get_base(RUNE_DUR);
+		     	break;}
+		case KEY_RUNE_AMA:{
+			magic_get_base(RUNE_AMA);
+		     	break;}
+		case KEY_RUNE_KOL:{
+			magic_get_base(RUNE_KOL);
+		     	break;}
+		case KEY_RUNE_RO:{
+			magic_get_base(RUNE_RO);
+		     	break;}
+		case KEY_RUNE_AN:{
+			magic_get_end(RUNE_AN);
+		     	break;}
+		case KEY_RUNE_AS:{
+			magic_get_end(RUNE_AS);
+		     	break;}
+		case KEY_RUNE_US:{
+			magic_get_end(RUNE_US);
+		     	break;}
+		case KEY_RUNE_IL:{
+			magic_get_end(RUNE_IL);
+		     	break;}
+		case KEY_RUNE_ON:{
+			magic_get_end(RUNE_ON);
+		     	break;}
+		case KEY_RUNE_IR:{
+			magic_get_end(RUNE_IR);
+		     	break;}
+		case KEY_SPELL_INTERRUPT:{
+			int i;
+			for(i=0; i<n_word; i++){
+				n_rune[i]=0;
+			}
+			n_word=0;
+			printf("\n");
+			break;}
 		default:{
 			break;}
 	}

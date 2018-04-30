@@ -1,209 +1,277 @@
 #include "mechanics.h"
+#include "geometry.h"
+#include "storemagic.h"
+
+bool collision_object_walls(double x, double y, double r){
+	int i, g=0;
+	SEGMENT wall_segment[4];
 
 
-typedef struct segment{
-	double x1;
-	double y1;
-	double x2;
-	double y2;
-}SEGMENT;
+	while(g<n_wall){
+		wall_segment[0].x[0]=level_walls[g].x[0];
+		wall_segment[0].y[0]=level_walls[g].y[0];
+		wall_segment[0].x[1]=level_walls[g].x[0];
+		wall_segment[0].y[1]=level_walls[g].y[1];
 
-bool check_collision(SEGMENT s1, SEGMENT s2, double *crosspoint){
-	float s1_x, s1_y, s2_x, s2_y;
-	s1_x=s1.x2-s1.x1;
-	s1_y=s1.y2-s1.y1;
-	s2_x=s2.x2-s2.x1;
-	s2_y=s2.y2-s2.y1;
+		wall_segment[1].x[0]=level_walls[g].x[0];
+		wall_segment[1].y[0]=level_walls[g].y[1];
+		wall_segment[1].x[1]=level_walls[g].x[1];
+		wall_segment[1].y[1]=level_walls[g].y[1];
 
-	float s, t;
-	s=(-s1_y*(s1.x1-s2.x1)+s1_x*(s1.y1-s2.y1))/(-s2_x*s1_y+s1_x*s2_y);
-	t=(s2_x*(s1.y1-s2.y1)-s2_y*(s1.x1-s2.x1))/(-s2_x*s1_y+s1_x*s2_y);
+		wall_segment[2].x[0]=level_walls[g].x[1];
+		wall_segment[2].y[0]=level_walls[g].y[1];
+		wall_segment[2].x[1]=level_walls[g].x[1];
+		wall_segment[2].y[1]=level_walls[g].y[0];
 
-	if(s>=0 && s<=1 && t>=0 && t<=1)
-	{
-		//Collision detected
-		crosspoint[0]=s1.x1+(t*s1_x);
-		crosspoint[1]=s1.y1+(t*s1_y);
-		return true;
-	}
-
-	return false; //No collision
-}
-
-bool check_obstacles(double newPosX, double newPosY, double hitbox){
-	int count=0, i;
-	double intersection[2]={0.0, 0.0};
-
-	SEGMENT hitboxLeft, hitboxRight, hitboxBack, hitboxFront, wallSegment[4];
-
-	hitboxLeft.x1=newPosX-hitbox;
-	hitboxLeft.y1=newPosY-hitbox;
-	hitboxLeft.x2=newPosX-hitbox;
-	hitboxLeft.y2=newPosY+hitbox;
-
-	hitboxRight.x1=newPosX+hitbox;
-	hitboxRight.y1=newPosY-hitbox;
-	hitboxRight.x2=newPosX+hitbox;
-	hitboxRight.y2=newPosY+hitbox;
-
-	hitboxBack.x1=newPosX-hitbox;
-	hitboxBack.y1=newPosY-hitbox;
-	hitboxBack.x2=newPosX-hitbox;
-	hitboxBack.y2=newPosY+hitbox;
-
-	hitboxFront.x1=newPosX-hitbox;
-	hitboxFront.y1=newPosY+hitbox;
-	hitboxFront.x2=newPosX+hitbox;
-	hitboxFront.y2=newPosY+hitbox;
-
-	while(count<n_wall){
-		wallSegment[0].x1=level_walls[count].x[0];
-		wallSegment[0].y1=level_walls[count].y[0];
-		wallSegment[0].x2=level_walls[count].x[0];
-		wallSegment[0].y2=level_walls[count].y[1];
-
-		wallSegment[1].x1=level_walls[count].x[0];
-		wallSegment[1].y1=level_walls[count].y[1];
-		wallSegment[1].x2=level_walls[count].x[1];
-		wallSegment[1].y2=level_walls[count].y[1];
-
-		wallSegment[2].x1=level_walls[count].x[1];
-		wallSegment[2].y1=level_walls[count].y[1];
-		wallSegment[2].x2=level_walls[count].x[1];
-		wallSegment[2].y2=level_walls[count].y[0];
-
-		wallSegment[3].x1=level_walls[count].x[1];
-		wallSegment[3].y1=level_walls[count].y[0];
-		wallSegment[3].x2=level_walls[count].x[0];
-		wallSegment[3].y2=level_walls[count].y[0];
+		wall_segment[3].x[0]=level_walls[g].x[1];
+		wall_segment[3].y[0]=level_walls[g].y[0];
+		wall_segment[3].x[1]=level_walls[g].x[0];
+		wall_segment[3].y[1]=level_walls[g].y[0];
 
 		for(i=0; i<4; i++){			//for each side of wall
-			if(check_collision(hitboxFront, wallSegment[i], intersection)){
-				return false;
-			}
-	
-			if(check_collision(hitboxBack, wallSegment[i], intersection)){
-				return false;
-			}
-	
-			if(check_collision(hitboxRight, wallSegment[i], intersection)){
-				return false;
-			}
-	
-			if(check_collision(hitboxLeft, wallSegment[i], intersection)){
-				return false;
-			}
+			if(circle_segment_collision(wall_segment[i], x, y, r)){
+				return true;}
 		}
-
-		count++;
+		g++;
 	}
 
-	return true;
+	return false;
 }
 
-int change_position(int direction, double speed,
-		   double *xPos, double *yPos, double hitbox){
-	switch(direction){
-		case DIRECTION_UP_RIGHT:{
-			if(check_obstacles(*xPos+(speed*DIAGONAL_MOTION_FACTOR), 
-					 *yPos+(speed*DIAGONAL_MOTION_FACTOR),hitbox)){
-			*xPos=*xPos+(speed*DIAGONAL_MOTION_FACTOR);
-			*yPos=*yPos+(speed*DIAGONAL_MOTION_FACTOR);}
-			break;}
+bool collision_segment_walls(SEGMENT segment){
+	int i, g=0;
+	double crosspoint[2];
+	SEGMENT wall_segment[4];
 
-		case DIRECTION_UP:{
-			if(check_obstacles(*xPos, *yPos+speed, hitbox)){
-			*yPos=*yPos+speed;}
-			break;}
 
-		case DIRECTION_RIGHT:{
-			if(check_obstacles(*xPos+speed, *yPos, hitbox)){
-			*xPos=*xPos+speed;}
-			break;}
+	while(g<n_wall){
+		wall_segment[0].x[0]=level_walls[g].x[0];
+		wall_segment[0].y[0]=level_walls[g].y[0];
+		wall_segment[0].x[1]=level_walls[g].x[0];
+		wall_segment[0].y[1]=level_walls[g].y[1];
 
-		case DIRECTION_DOWN_LEFT:{
-			if(check_obstacles(*xPos-(speed*DIAGONAL_MOTION_FACTOR), 
-					 *yPos-(speed*DIAGONAL_MOTION_FACTOR),hitbox)){
-			*xPos=*xPos-(speed*DIAGONAL_MOTION_FACTOR);
-			*yPos=*yPos-(speed*DIAGONAL_MOTION_FACTOR);}
-			break;}
+		wall_segment[1].x[0]=level_walls[g].x[0];
+		wall_segment[1].y[0]=level_walls[g].y[1];
+		wall_segment[1].x[1]=level_walls[g].x[1];
+		wall_segment[1].y[1]=level_walls[g].y[1];
 
-		case DIRECTION_LEFT:{
-			if(check_obstacles(*xPos-speed, *yPos, hitbox)){
-			*xPos=*xPos-speed;}
-			break;}
+		wall_segment[2].x[0]=level_walls[g].x[1];
+		wall_segment[2].y[0]=level_walls[g].y[1];
+		wall_segment[2].x[1]=level_walls[g].x[1];
+		wall_segment[2].y[1]=level_walls[g].y[0];
 
-		case DIRECTION_DOWN:{
-			if(check_obstacles(*xPos, *yPos-speed, hitbox)){
-			*yPos=*yPos-speed;}
-			break;}
+		wall_segment[3].x[0]=level_walls[g].x[1];
+		wall_segment[3].y[0]=level_walls[g].y[0];
+		wall_segment[3].x[1]=level_walls[g].x[0];
+		wall_segment[3].y[1]=level_walls[g].y[0];
 
-		case DIRECTION_UP_LEFT:{
-			if(check_obstacles(*xPos-(speed*DIAGONAL_MOTION_FACTOR), 
-					 *yPos+(speed*DIAGONAL_MOTION_FACTOR),hitbox)){
-			*xPos=*xPos-(speed*DIAGONAL_MOTION_FACTOR);
-			*yPos=*yPos+(speed*DIAGONAL_MOTION_FACTOR);}
-			
-			break;}
-
-		case DIRECTION_DOWN_RIGHT:{
-			if(check_obstacles(*xPos+(speed*DIAGONAL_MOTION_FACTOR), 
-					 *yPos-(speed*DIAGONAL_MOTION_FACTOR),hitbox)){
-			*xPos=*xPos+(speed*DIAGONAL_MOTION_FACTOR);
-			*yPos=*yPos-(speed*DIAGONAL_MOTION_FACTOR);}
-			break;}
-
-		default:{break;}
+		for(i=0; i<4; i++){			//for each side of wall
+			if(segments_collision(wall_segment[i], segment, 
+						crosspoint)){
+				return true;}
+		}
+		g++;
 	}
+
+	return false;
 }
 
-int determine_player_direction(){			//Set the direction of char,
-	if(key_motion[KEY_A]){				//considering pressed keys
-		unit_player.direction=DIRECTION_LEFT;}
+bool collision_object_units(double x, double y, double r){
+	int i;
 
-	if(key_motion[KEY_D]){
-		unit_player.direction=DIRECTION_RIGHT;}
-
-	if(key_motion[KEY_S]){
-		unit_player.direction=DIRECTION_DOWN;
-		if(key_motion[KEY_A]){
-			unit_player.direction=DIRECTION_DOWN_LEFT;}
-		if(key_motion[KEY_D]){
-			unit_player.direction=DIRECTION_DOWN_RIGHT;}
+	for(i=0; i<n_npc; i++){
+		if(circles_collision(unit_npc[i].x, unit_npc[i].y, 
+		   unit_npc[i].hitbox, x, y, r)){
+			return true;}
 	}
 
-	if(key_motion[KEY_W]){
-		unit_player.direction=DIRECTION_UP;
-		if(key_motion[KEY_A]){
-			unit_player.direction=DIRECTION_UP_LEFT;}
-		if(key_motion[KEY_D]){
-			unit_player.direction=DIRECTION_UP_RIGHT;}}
+	return false;
+}
 
-							//offset of camera rotation
-	unit_player.direction=(unit_player.direction+turn_ratio)%8;
+bool collision_segment_units(SEGMENT segment){
+	int i;
+
+	for(i=0; i<n_npc; i++){
+		if(circle_segment_collision(segment, unit_npc[i].x, unit_npc[i].y,
+					    unit_npc[i].hitbox)){
+			return true;}
+	}
+
+	return false;
+}
+
+int char_move(UNIT *unit, double target_x, double target_y){ //Movement animation
+
+	SEGMENT motion_vector;
+	motion_vector.x[0]=unit->x;
+	motion_vector.y[0]=unit->y;
+	motion_vector.x[1]=target_x;
+	motion_vector.y[1]=target_y;
+
+	motion_vector=change_vector_length(motion_vector, unit->speed*FRAME_TIME);
+
+	if(!(collision_object_walls(motion_vector.x[1], motion_vector.y[1], 
+				  unit->hitbox)
+	||collision_object_units(motion_vector.x[1], motion_vector.y[1], 
+				 unit->hitbox))
+	||collision_segment_units(motion_vector)
+	||collision_segment_walls(motion_vector)){
+		unit->x=motion_vector.x[1];
+		unit->y=motion_vector.y[1];
+	}
+
 	return 0;
 }
 
-bool determine_player_motion(){				//Check for moving possibility
-	if(!(key_motion[KEY_W]|key_motion[KEY_A]|key_motion[KEY_S]|key_motion[KEY_D])){
-		return false;}
-
-	if((key_motion[KEY_W]&&key_motion[KEY_S])|
-	(key_motion[KEY_A]&&key_motion[KEY_D])){
-		return false;}
-
-	return true;
+int bury_spell(int index){
+	printf("number %d is dead!\n", index+1);
+	if(index+1==n_magic){
+		n_magic--;
+	}
+	else{
+		int i;
+		for(i=index+1; i<n_magic; i++){
+			magic_object[i-1]=magic_object[i];
+		}
+		n_magic--;
+	}
 }
 
-int char_move(UNIT *unit){			//Movement animation
-	int i;
-	if(determine_player_motion()){
-		determine_player_direction();
+int magic_move(MAGIC *magic, int index){ //Movement animation
+	SEGMENT target_vector;
+	target_vector.x[0]=magic->x;
+	target_vector.y[0]=magic->y;
+	target_vector.x[1]=magic->target_x;
+	target_vector.y[1]=magic->target_y;
 
-		for(i=0; i<(FRAME_TIME); i++){
-			change_position(unit->direction, unit->speed, 
-				       &unit->x, &unit->y, 
-				       unit->hitbox);
+	target_vector=change_vector_length(target_vector, magic->speed*10);
+	magic->target_x=target_vector.x[1];
+	magic->target_y=target_vector.y[1];
+
+	SEGMENT motion_vector;
+	motion_vector.x[0]=magic->x;
+	motion_vector.y[0]=magic->y;
+	motion_vector.x[1]=magic->target_x;
+	motion_vector.y[1]=magic->target_y;
+
+	motion_vector=change_vector_length(motion_vector, magic->speed*FRAME_TIME);
+
+	switch(magic->form){
+		case WORD_FORM_POINTED:
+		{
+			//If conserns unit/player, impose effect and be destroyed
+			if(collision_object_units
+			(motion_vector.x[1], motion_vector.y[1], magic->size)||
+			circles_collision
+			(unit_player.x, unit_player.y, unit_player.hitbox,
+			motion_vector.x[1], motion_vector.y[1], magic->size)||
+			collision_segment_units(motion_vector)){
+				bury_spell(index);
+				break;
+			}
+
+			//Else if conserns wall, be destroyed
+			else if(collision_object_walls
+			(motion_vector.x[1], motion_vector.y[1], magic->size)||
+			collision_segment_walls(motion_vector)){
+				bury_spell(index);
+			}
+
+			//No collision - move
+			else{
+				magic->x=motion_vector.x[1];
+				magic->y=motion_vector.y[1];}
+			
+			//Decrease time and size
+			magic->time-=FRAME_TIME;
+			magic->size-=magic->begin_size/(magic->begin_time/FRAME_TIME);
+
+			//Time is over - bury
+			if(magic->time<=0){
+				bury_spell(index);
+			}
+			break;
+		}
+
+		case WORD_FORM_SQUARE:
+		{
+			//Don't consern any wall
+			if(!(collision_object_walls
+			(motion_vector.x[1], motion_vector.y[1], magic->size)||
+			collision_segment_walls(motion_vector))){
+	
+				//If conserns unit/player, impose effect and move
+				if(collision_object_units
+				(motion_vector.x[1], motion_vector.y[1], magic->size)||
+				circles_collision
+				(unit_player.x, unit_player.y, unit_player.hitbox,
+				motion_vector.x[1], motion_vector.y[1], magic->size)||
+				collision_segment_units(motion_vector)){
+					/*here must be effect imposing*/
+				}
+
+				//Don't consern walls - move
+				magic->x=motion_vector.x[1];
+				magic->y=motion_vector.y[1];
+			}
+			
+			//If conserns wall, be reduced by its speed and move
+			else{
+				magic->size=magic->size-magic->speed*FRAME_TIME;
+				magic->x=motion_vector.x[1];
+				magic->y=motion_vector.y[1];
+			}
+
+			//Decrease time and size
+			magic->time-=FRAME_TIME;
+			magic->size-=magic->begin_size/(magic->begin_time/FRAME_TIME);
+			
+			//Too small square or time is over - bury
+			if((magic->size<=0)||(magic->time<=0)){
+				bury_spell(index);
+			}
+
+			break;
+		}
+
+		case WORD_FORM_RADIAL:
+		{
+			//Move to player
+			magic->x=unit_player.x;
+			magic->y=unit_player.y;
+
+			//If conserns unit/player, impose effect and grow
+			if(collision_object_units
+			(magic->x, magic->y, magic->size+magic->speed)||
+			circles_collision
+			(unit_player.x, unit_player.y, unit_player.hitbox,
+			magic->x, magic->y, magic->size+magic->speed)){
+				/*here must be effect imposing*/
+			}
+
+			//Don't consern any wall - grow by its speed
+			if(!(collision_object_walls
+			(magic->x, magic->y, magic->size))&&(magic->size<magic->max_size)){
+				magic->size+=magic->speed*FRAME_TIME;
+			}
+			//Consern wall - decrease in size until it do
+			else
+			{
+				do{
+					magic->size-=magic->speed*FRAME_TIME;
+				}while(collision_object_walls
+				(magic->x, magic->y, magic->size));
+			}
+			
+			//Decrease time
+			magic->time-=FRAME_TIME;
+			
+			//Time is over - bury
+			if(magic->time<=0){
+				bury_spell(index);
+			}
+
+			break;
 		}
 	}
 
@@ -224,6 +292,20 @@ int bury_npc(int index){
 	}
 }
 
+int bury_npc_effect(int unit, int index){
+	printf("number %d is dead!\n", index+1);
+	if(index+1==unit_npc[unit].n_state){
+		unit_npc[unit].n_state--;
+	}
+	else{
+		int i;
+		for(i=index+1; i<unit_npc[unit].n_state; i++){
+			unit_npc[unit].state[i-1]=unit_npc[unit].state[i];
+		}
+		unit_npc[unit].n_state--;
+	}
+}
+
 int check_graveyard(){
 	int i=0;
 
@@ -237,11 +319,37 @@ int check_graveyard(){
 	}
 }
 
+int refresh_player_angle(){
+	SEGMENT direction_vector;
+
+	direction_vector.x[0]=unit_player.x;
+	direction_vector.y[0]=unit_player.y;
+	direction_vector.x[1]=mouse_x-unit_player.x;
+	direction_vector.y[1]=mouse_y-unit_player.y;
+
+	double arc=atan2(direction_vector.y[1], direction_vector.x[1])*180/3.1415;
+
+//	printf("\n%f\n", arc);
+
+	unit_player.direction=arc;
+
+	return 0;
+}
 
 int state_process(){			//Processing of units state
 	int i;
 
 	check_graveyard();
+
+	return 0;
+}
+
+int magic_process(){
+	int i;
+
+	for(i=0; i<n_magic; i++){
+		magic_move(&magic_object[i], i);
+	}
 
 	return 0;
 }
