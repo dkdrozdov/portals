@@ -66,6 +66,18 @@ const int RUNE_BASE_COMPLICATED[N_RUNES-RUNE_END_OFFSET]={
 //Spells
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MAGIC<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<//
 
+int free_effect_id(){
+	int i;
+
+	for(i=0; i<MAGIC_MAX; i++){
+		if(effect_buffer[i]==0){
+			return i;
+		}
+	}
+
+	return MAGIC_MAX;
+}
+
 int find_property(int property){
 	int i;
 
@@ -97,52 +109,67 @@ int magic_get_spell(){
 	spell.size=0;		spell.speed=0;
 	spell.time=0;		spell.type=0;
 	spell.form=0;		spell.owner=0;
+	spell.exclusion=false;
 	spell.cost=0;		spell.performance=0;
-	spell.effect.time=0;	spell.effect.value=0;
-	spell.effect.type=0;
+	spell.n_effect=1;
 
 	int index;
 
 
-	if(!spell_create_condition()){
+	if((!spell_create_condition())||(free_effect_id()==MAGIC_MAX)){
 		return 0;
 	}
 
+	spell.id=free_effect_id();
+	effect_buffer[spell.id]++;
+	
 		//Type
 	index=find_property(RUNE_SPELL_TYPE);
 	spell.type=spell_sentence[index];
+
+	switch(spell.type){
+		case EFFECT_ELEMENT_HEAT:{
+			spell.effect[0].role=EFFECT_HP;
+			spell.effect[0].time=0.1;
+			spell.effect[0].type=spell.type;
+			spell.effect[0].id=spell.id*10+1;
+		break;}
+	}
 
 		//Form
 	index=find_property(RUNE_SPELL_FORM);
 	spell.form=spell_sentence[index];
 
 	switch(spell.form){
-		case WORD_FORM_POINTED:{
+		case MAGIC_FORM_POINTED:{
 			spell.speed=15.0;
 			spell.target_x=mouse_x;
 			spell.target_y=mouse_y;
 			spell.begin_size=0.3;
 			spell.size=0.3;
+			spell.effect[0].value=-5/spell.effect[0].time;
 			break;}
 
-		case WORD_FORM_SQUARE:{
+		case MAGIC_FORM_SQUARE:{
 			spell.speed=10.0;
 			spell.target_x=mouse_x;
 			spell.target_y=mouse_y;
 			spell.begin_size=3;
 			spell.size=3;
+			spell.effect[0].value=-2;
 			break;}
 
-		case WORD_FORM_RADIAL:{
-			spell.speed=7.0;
+		case MAGIC_FORM_RADIAL:{
+			spell.speed=10.0;
 			spell.begin_size=0;
 			spell.size=0;
 			spell.max_size=7;
+			spell.effect[0].value=-2;
 			break;}
 
-		case WORD_FORM_ONESELF:{break;}
-		case WORD_FORM_AVOID:{break;}
-		case WORD_FORM_CLOAK:{break;}
+		case MAGIC_FORM_ONESELF:{break;}
+		case MAGIC_FORM_AVOID:{break;}
+		case MAGIC_FORM_CLOAK:{break;}
 	}
 
 		//Performance
@@ -150,21 +177,21 @@ int magic_get_spell(){
 	spell.performance=spell_sentence[index];
 
 	switch(spell.performance){
-		case WORD_PERFORMANCE_BLAST:{
+		case MAGIC_PERFORMANCE_BLAST:{
 			SEGMENT spell_path;
-			spell_path.x[0]=unit_player.x;
-			spell_path.y[0]=unit_player.y;
+			spell_path.x[0]=unit_list[0].x;
+			spell_path.y[0]=unit_list[0].y;
 			spell_path.x[1]=mouse_x;
 			spell_path.y[1]=mouse_y;
 		
 			switch(spell.form){
-				case WORD_FORM_POINTED:
+				case MAGIC_FORM_POINTED:
 				{
 					//Avoid target oneself
 					if(segment_length(spell_path)<
-					unit_player.hitbox+spell.size+0.1){
+					unit_list[0].hitbox+spell.size+0.1){
 					spell_path=change_vector_length
-					(spell_path, (unit_player.hitbox+spell.size+0.1)*2);
+					(spell_path, (unit_list[0].hitbox+spell.size+0.1)*2);
 						spell.target_x=spell_path.x[1];
 						spell.target_y=spell_path.y[1];
 					}
@@ -176,14 +203,14 @@ int magic_get_spell(){
 					//Starting position: in front of the player,
 					//no touch with player
 					spell_path=change_vector_length
-					(spell_path, unit_player.hitbox+spell.size+0.1);
+					(spell_path, unit_list[0].hitbox+spell.size+0.1);
 
 					spell.x=spell_path.x[1];
 					spell.y=spell_path.y[1];
 
 					break;}
 
-				case WORD_FORM_SQUARE:
+				case MAGIC_FORM_SQUARE:
 				{
 					//Time
 					spell.begin_time=1.5;
@@ -192,39 +219,47 @@ int magic_get_spell(){
 					//Starting position: in front of the player,
 					//touch him
 					spell_path=change_vector_length
-					(spell_path, unit_player.hitbox);
+					(spell_path, unit_list[0].hitbox);
 	
 					spell.x=spell_path.x[1];
 					spell.y=spell_path.y[1];
 
 					break;}
 				
-				case WORD_FORM_RADIAL:
+				case MAGIC_FORM_RADIAL:
 				{
 					//Time
 					spell.begin_time=1.0;
 					spell.time=1.0;
 
 					//Starting position: right in player position
-					spell.x=unit_player.x;
-					spell.y=unit_player.y;
+					spell.x=unit_list[0].x;
+					spell.y=unit_list[0].y;
 
 					break;}
 
 			}
 	
 			break;}
-		case WORD_PERFORMANCE_INSTANT:{break;}
-		case WORD_PERFORMANCE_MAINTAIN:{break;}
-		case WORD_PERFORMANCE_STUFF:{break;}
-		case WORD_PERFORMANCE_SKY:{break;}
-		case WORD_PERFORMANCE_GROUND:{break;}
+		case MAGIC_PERFORMANCE_INSTANT:{break;}
+		case MAGIC_PERFORMANCE_MAINTAIN:{break;}
+		case MAGIC_PERFORMANCE_STUFF:{break;}
+		case MAGIC_PERFORMANCE_SKY:{break;}
+		case MAGIC_PERFORMANCE_GROUND:{break;}
 	}
 
 		//Size
 	index=find_property(RUNE_SPELL_SIZE);
 
+		//Etc.
+	if(find_property(RUNE_SPELL_EXCLUSION)!=n_word){
+		spell.exclusion=true;
+	}
+
+
 	magic_object[n_magic]=spell;
+
+	printf("%d\n", magic_object[n_magic].id);
 
 	n_magic++;
 

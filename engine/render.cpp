@@ -1,16 +1,13 @@
 #include "store.h"
+#include "storemagic.h"
 #include "mechanics.h"
 #include "input.h"
 
 //Level
 OBSTACLE_WALL level_walls[WALL_MAX];
 PLATFORM level_platforms[PLATFORM_MAX];
-UNIT unit_npc[UNIT_MAX];
-int n_wall=0, n_platform=0, n_npc=1;
-
-//Character
-UNIT unit_player={5.0, 5.0, PLAYER_SPEED, PLAYER_HITBOX, 0, 1};
-
+UNIT unit_list[UNIT_MAX];
+int n_wall=0, n_platform=0, n_unit=2;
 //
 
 //Keyboard
@@ -33,6 +30,7 @@ int n_magic;
 int state_spell[N_WORDS_MAX][N_RUNES_MAX];
 int spell_sentence[N_WORDS_MAX];
 int n_word=0, n_rune[N_WORDS_MAX];
+int effect_buffer[MAGIC_MAX];
 
 
 int draw_platforms(){
@@ -80,16 +78,35 @@ int draw_circle(GLint edges, GLdouble size){
 	return 0;
 }
 
-int draw_unit(UNIT unit){
+int set_unit_color(UNIT unit){
+	int i;
 
+	for(i=0; i<unit.n_state; i++){
+		switch(unit.state[i].type){
+			case EFFECT_ELEMENT_HEAT:
+			{
+				glColor3f(1.0, 0.0, 0.0);
+			break;}
+
+			case EFFECT_LIFE:
+			{
+				glColor3f(0.2, 0.2, 1.0);
+			break;}
+		}
+	}
+
+	return 0;
+}
+
+int draw_unit(UNIT unit){
 	//Direction arrow
 	glPushMatrix();
+		glColor3f(1.0, 0.0, 0.0);
 		glTranslatef(-camera_x+unit.x, 
 			     -camera_y+unit.y, 0.0);
 		glRotatef(unit.direction, 0.0, 0.0, 1.0);
 		glBegin(GL_LINES);		
 			glRotatef(-90.0, 1.0, 0.0, 0.0);
-			glColor3f(1.0, 0.0, 0.0);
 			glVertex2f(0.0, 0.0);
 			glVertex2f(unit.hitbox, 0.0);
 		glEnd();
@@ -99,8 +116,10 @@ int draw_unit(UNIT unit){
 	glPushMatrix();
 		glTranslatef(-camera_x+unit.x,
 			     -camera_y+unit.y, 0.1);
-		glColor3f(0.2, 0.2, 1.0);
+		glLineWidth(2.5);
+		set_unit_color(unit);
 		draw_circle(30, (GLdouble)unit.hitbox);
+		glLineWidth(1.0);
 	glPopMatrix();
 
 	//Hit bar
@@ -130,8 +149,24 @@ int draw_unit(UNIT unit){
 	return 0;
 }
 
+int set_magic_color(MAGIC magic){
+	int i;
+
+	for(i=0; i<magic.n_effect; i++){
+		switch(magic.effect[i].type){
+			case EFFECT_ELEMENT_HEAT:
+			{
+				glColor3f(1.0, 0.0, 0.0);
+			break;}
+		}
+	}
+
+	return 0;
+}
+
 int draw_magic(MAGIC magic){
 	glPushMatrix();
+		set_magic_color(magic);
 		glTranslatef(-camera_x+magic.x,
 			     -camera_y+magic.y, 0.1);
 		glColor3f(1.0, 1.0, 1.0);
@@ -168,10 +203,10 @@ void init(void){
 	loadLevel();
 }
 
-int draw_npcs(){
+int draw_units(){
 	int i;
-	for(i=0; i<n_npc; i++){
-		draw_unit(unit_npc[i]);}
+	for(i=0; i<n_unit; i++){
+		draw_unit(unit_list[i]);}
 	return 0;
 }
 
@@ -189,12 +224,10 @@ void display(void){
 		glRotatef(-45.0*turn_ratio, 0.0, 0.0, 1.0);
 		draw_platforms();
 		draw_walls();
-		draw_unit(unit_player);
-		draw_npcs();
+		draw_units();
 		draw_axis();
 		draw_magic_objects();
 	glPopMatrix();
-
 
 	glutSwapBuffers();	
 }
@@ -239,8 +272,6 @@ void mouse_motion(int x, int y){
 	mouse_x=real_x+camera_x;
 	mouse_y=real_y+camera_y;
 
-	refresh_player_angle();
-
 	glutPostRedisplay();
 //	printf("%f, %f\n", mouse_x, mouse_y);
 }
@@ -256,10 +287,16 @@ void keyboard_up(unsigned char key, int x, int y){
 
 void mouse(int button, int state, int x, int y){
 	switch(button){
-		case GLUT_LEFT:
+		case GLUT_LEFT_BUTTON:
 			{
 				mouse_left=state;
 				mouse_motion(x, y);
+				break;}
+		case GLUT_RIGHT_BUTTON:
+			{
+				if(state==GLUT_DOWN){
+					mouse_motion(x, y);
+					refresh_player_angle();}
 				break;}
 	}
 }
@@ -268,24 +305,19 @@ void idle_frames(void){
 	Sleep(FRAME_TIME*1000);
 
 	int i;
-	magic_process();
+
 	state_process();
+	magic_process();
 
-	if(unit_player.state[0].value<=0){
-		printf("You are dead!\n");
-		exit(0);
-	}
-
-	if(mouse_left==GLUT_DOWN&&(!(unit_player.x==mouse_x&&unit_player.y==mouse_y))){
+	if(mouse_left==GLUT_DOWN&&(!(unit_list[0].x==mouse_x&&unit_list[0].y==mouse_y))){
+		refresh_player_angle();
 		mouse_motion(window_mouse_x, window_mouse_y);
-		char_move(&unit_player, mouse_x, mouse_y);}
+		unit_move(&unit_list[0], 0, mouse_x, mouse_y);}
 
 	if(!camera_fixed){
-		camera_x=unit_player.x;
-		camera_y=unit_player.y;}
+		camera_x=unit_list[0].x;
+		camera_y=unit_list[0].y;}
 
-
-	
 	glutPostRedisplay();
 }
 
@@ -300,7 +332,7 @@ int main(int argc, char **argv){
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
 	glutKeyboardFunc(keyboard);
-//	glutPassiveMotionFunc(mouse_motion);
+	glutPassiveMotionFunc(mouse_motion);
 	glutMotionFunc(mouse_motion);
 	glutMouseFunc(mouse);
 	glutIdleFunc(idle_frames);

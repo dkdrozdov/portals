@@ -48,31 +48,28 @@ int keystroke(unsigned char usedKey){
 			command_handler();
 			break;}*/
 		case 'k':{				//k - kill
-			 int index;
-			 printf("Index: ");
-			 scanf("%d", &index);
+			int index;
+			printf("Index: ");
+			scanf("%d", &index);
 
-			 if(index==0){
-			 	unit_player.state[0].value=0;}
-			 else{
-				unit_npc[index-1].state[0].value=0;}
+			unit_list[index].state[0].value=0;
 
 			 break;}
 		case 'n':{
-			 if(n_npc<=UNIT_MAX-1){
-				unit_npc[n_npc].speed=PLAYER_SPEED;
-				unit_npc[n_npc].hitbox=PLAYER_HITBOX;
-				unit_npc[n_npc].direction=0;
-				unit_npc[n_npc].x=unit_player.x+unit_player.hitbox
-				 		+unit_npc[n_npc].hitbox;
-				unit_npc[n_npc].y=unit_player.y;
-				unit_npc[n_npc].max_hp=10;
-				unit_npc[n_npc].state[0].time=0;
-				unit_npc[n_npc].state[0].value=10;
-				unit_npc[n_npc].state[0].type=LIFE;
-				unit_npc[n_npc].n_state=1;
-				n_npc++;
-				printf("n_npc=%d\n", n_npc);}
+			 if(n_unit<=UNIT_MAX-1){
+				unit_list[n_unit].speed=PLAYER_SPEED;
+				unit_list[n_unit].hitbox=PLAYER_HITBOX;
+				unit_list[n_unit].direction=0;
+				unit_list[n_unit].x=mouse_x;
+				unit_list[n_unit].y=mouse_y;
+				unit_list[n_unit].max_hp=10;
+				unit_list[n_unit].state[0].time=0;
+				unit_list[n_unit].state[0].value=10;
+				unit_list[n_unit].state[0].role=EFFECT_LIFE;
+				unit_list[n_unit].state[0].type=EFFECT_LIFE;
+				unit_list[n_unit].n_state=1;
+				n_unit++;
+				printf("n_unit=%d\n", n_unit);}
 			 break;}
 		case KEY_RUNE_KAN:{
 			magic_get_base(RUNE_KAN);

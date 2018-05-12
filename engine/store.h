@@ -11,8 +11,8 @@
 const double FRAME_TIME=0.01;
 
 //Level
-const double PLATFORM_WIDTH=10.0;
-const double PLATFORM_LENGTH=10.0;
+const double PLATFORM_WIDTH=20.0;
+const double PLATFORM_LENGTH=20.0;
 const int UNIT_MAX=10;
 const int WALL_MAX=10;
 const int PLATFORM_MAX=10;
@@ -23,18 +23,10 @@ const double WALL_HEIGHT=5.0;
 //Character
 const double PLAYER_SPEED=5.0;
 const double PLAYER_HITBOX=1.0;
-const double DIAGONAL_MOTION_FACTOR=0.75;
-const int DIRECTION_UP=0;
-const int DIRECTION_UP_LEFT=1;
-const int DIRECTION_LEFT=2;
-const int DIRECTION_DOWN_LEFT=3;
-const int DIRECTION_DOWN=4;
-const int DIRECTION_DOWN_RIGHT=5;
-const int DIRECTION_RIGHT=6;
-const int DIRECTION_UP_RIGHT=7;
 
 //Effects
-const int LIFE=0;
+const int EFFECT_LIFE=0;
+const int EFFECT_HP=1;
 
 //Keyboard
 const int KEY_W=0;
@@ -58,9 +50,11 @@ typedef struct platform_struct{
 }PLATFORM;
 
 typedef struct effect_struct{
-	int time;
-	int value;
+	double time;
+	double value;
 	int type;
+	int role;
+	int id;
 }EFFECT;
 
 typedef struct unit_struct{
@@ -87,12 +81,16 @@ typedef struct object_magic_struct{
 	double time;
 
 	int type, form, performance;
+	bool exclusion;
 
 	int owner;
+	int id;
+
 	int cost;
 
 	bool is_form, is_performance;
-	EFFECT effect;
+	EFFECT effect[10];
+	int n_effect;
 }MAGIC;
 
 typedef struct object_struct{
@@ -104,9 +102,8 @@ typedef struct object_struct{
 //level
 extern OBSTACLE_WALL level_walls[WALL_MAX];
 extern PLATFORM level_platforms[PLATFORM_MAX];
-extern UNIT unit_player;
-extern UNIT unit_npc[UNIT_MAX];
-extern int n_wall, n_platform, n_npc;
+extern UNIT unit_list[UNIT_MAX];
+extern int n_wall, n_platform, n_unit;
 //camera
 extern bool key_motion[4];
 extern int turn_ratio;
@@ -118,3 +115,5 @@ extern int spell_sentence[N_WORDS_MAX];
 extern int n_word, n_rune[N_WORDS_MAX];
 extern MAGIC magic_object[MAGIC_MAX];
 extern int n_magic;
+//effects
+extern int effect_buffer[MAGIC_MAX];
